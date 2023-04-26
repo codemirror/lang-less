@@ -191,7 +191,7 @@ LogicOp { @specialize<identifier, "and" | "or"> }
 
   VariableName { "--" word }
 
-  AtKeyword { "@" "@"? word }
+  AtKeyword { "@" "@"? word? }
 
   PropertyVariable { "$" word }
 
@@ -236,6 +236,8 @@ LogicOp { @specialize<identifier, "and" | "or"> }
   Escape { "~" StringLiteral }
 
   Interpolation { "@{" word "}" }
+
+  @precedence { Interpolation, AtKeyword }
 
   "#"
 

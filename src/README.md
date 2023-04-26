@@ -23,4 +23,6 @@ to communication around the project.
 
 @less
 
-@wastLanguage
+@lessLanguage
+
+@lessCompletionSource
