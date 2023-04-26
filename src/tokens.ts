@@ -1,5 +1,5 @@
 import {ExternalTokenizer} from "@lezer/lr"
-import {callee, identifier, VariableName, descendantOp, Unit} from "./less.grammar.terms"
+import {openArgList, descendantOp, Unit} from "./less.grammar.terms"
 
 const space = [9, 10, 11, 12, 13, 32, 133, 160, 5760, 8192, 8193, 8194, 8195, 8196, 8197,
                8198, 8199, 8200, 8201, 8202, 8232, 8233, 8239, 8287, 12288]
@@ -12,19 +12,11 @@ function isAlpha(ch: number) { return ch >= 65 && ch <= 90 || ch >= 97 && ch <= 
 
 function isDigit(ch: number) { return ch >= 48 && ch <= 57 }
 
-export const identifiers = new ExternalTokenizer((input, stack) => {
-  for (let inside = false, dashes = 0, i = 0;; i++) {
-    let {next} = input
-    if (isAlpha(next) || next == Ch.dash || next == Ch.underscore || (inside && isDigit(next))) {
-      if (!inside && (next != Ch.dash || i > 0)) inside = true
-      if (dashes === i && next == Ch.dash) dashes++
-      input.advance()
-    } else {
-      if (inside)
-        input.acceptToken(next == Ch.parenL && stack.canShift(callee) ? callee
-          : dashes == 2 && stack.canShift(VariableName) ? VariableName : identifier)
-      break
-    }
+export const argList = new ExternalTokenizer((input, stack) => {
+  if (input.next == Ch.parenL) {
+    let prev = input.peek(-1)
+    if (isAlpha(prev) || isDigit(prev) || prev == Ch.underscore || prev == Ch.dash)
+      input.acceptToken(openArgList, 1)
   }
 })
 

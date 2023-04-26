@@ -126,7 +126,13 @@ a:hover {
 .box {
   @alias: #library.colors();
   @alias();
-}`]
+}`, `// declare detached ruleset
+@detached-ruleset: { background: red; }; // semi-colon is optional in 3.5.0+
+
+// use detached ruleset
+.top {
+    @detached-ruleset(); 
+}`, `@import (less) "foo.css";`, `@plugin "my-plugin";`]
   for (let text of cases)
     it(/^.*/.exec(text)![0], () => strict.parse(text))
 })

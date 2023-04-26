@@ -3,6 +3,7 @@
   structure @left
   valueOp @left
   sub
+  call
 }
 
 @skip { whitespace | Comment | LineComment }
@@ -16,11 +17,16 @@ item {
   CharsetStatement |
   NamespaceStatement |
   KeyframesStatement |
-  SupportsStatement |
-  AtRule
+  SupportsStatement
 }
 
-mixinArgList { ArgList<value (":" value+ | value*) | AtKeyword? "..."> }
+mixinArgList {
+  "(" (mixinArg (("," | ";") mixinArg)*)? ")"
+}
+
+mixinArg {
+  value (":" value+ | value*) | AtKeyword? "..."
+}
 
 RuleSet {
   selector ("," selector)* mixinArgList? (@extend[@name=when]<identifier, "when"> value)? Block
@@ -58,11 +64,9 @@ SupportsStatement {
   @specialize[@name=supports]<AtKeyword, "@supports"> query Block
 }
 
-AtRule { AtKeyword commaSep<query> (";" | Block) }
-
 Block { "{" blockContent "}" }
 
-decl { Declaration | Inclusion | CallExpression }
+decl { Declaration | Inclusion | CallExpression { AtKeyword mixinArgList } }
 
 blockContent {
   ~item item* (decl (";" ~item item* decl?)*)?
@@ -75,9 +79,8 @@ selector {
   ClassSelector { selector? !attribute "." ClassName } |
   PseudoClassSelector {
     selector? !attribute (":" | "::") (
-      PseudoClassName { identifier } |
-      pseudoClassWithArg ArgList<value+> |
-      PseudoClassName { callee } ArgList<selector>)
+      PseudoClassName { identifier } ArgList<selector>? |
+      pseudoClassWithArg ArgList<value+>)
   } |
   IdSelector |
   AttributeSelector { selector? !attribute "[" AttributeName { identifier } (MatchOp value)? "]" } |
@@ -93,7 +96,7 @@ ClassName { identifier }
 IdName { identifier }
 
 pseudoClassWithArg {
-  @specialize[@name=PseudoClassName]<callee, "lang" | "nth-child" | "nth-last-child" | "nth-of-type" | "nth-last-of-type" | "nth-of-type" | "dir" | "host-context">
+  @specialize[@name=PseudoClassName]<identifier, "lang" | "nth-child" | "nth-last-child" | "nth-of-type" | "nth-last-of-type" | "nth-of-type" | "dir" | "host-context">
 }
 
 NumberLiteral {
@@ -101,7 +104,7 @@ NumberLiteral {
 }
 
 ArgList<content> {
-  "(" (content (("," | ";") content)*)? ")"
+  openArgList commaSep<content> ")"
 }
 
 PropertyName { identifier ~item }
@@ -125,8 +128,8 @@ query {
   BinaryQuery { query !valueOp (LogicOp | BinOp) query } |
   UnaryQuery { unaryOp query } |
   ParenthesizedQuery { "(" query ")" } |
-  SelectorQuery { @specialize[@name=selector]<callee, "selector"> "(" selector ")" } |
-  CallQuery { callee ArgList<query> } |
+  SelectorQuery { @specialize[@name=selector]<identifier, "selector"> "(" selector ")" } |
+  CallQuery { query !call ArgList<query> } |
   SubscriptQuery { query !sub "[" value? "]" } |
   AtKeyword |
   Escape |
@@ -153,12 +156,12 @@ value {
 }
 
 CallLiteral {
-  @specialize[@name=CallTag]<callee, "url" | "url-prefix" | "domain" | "regexp">
+  @specialize[@name=CallTag]<identifier, "url" | "url-prefix" | "domain" | "regexp">
   "(" (ParenthesizedContent | StringLiteral) ")"
 }
 
 CallExpression {
-  Callee { callee } ArgList<value+>
+  value !call ArgList<value+>
 }
 
 commaSep<value> { "" | value ("," value)* }
@@ -173,11 +176,7 @@ kw<term> { @specialize[@name={term}]<identifier, term> }
   Unit
 }
 
-@external tokens identifiers from "./tokens" {
-  callee,
-  identifier,
-  VariableName
-}
+@external tokens argList from "./tokens" { openArgList[@name="("] }
 
 LogicOp { @specialize<identifier, "and" | "or"> }
 
@@ -188,6 +187,10 @@ LogicOp { @specialize<identifier, "and" | "or"> }
 
   word { @asciiLetter (@asciiLetter | @digit | "-")* }
 
+  identifier { word }
+
+  VariableName { "--" word }
+
   AtKeyword { "@" "@"? word }
 
   PropertyVariable { "$" word }
@@ -197,6 +200,8 @@ LogicOp { @specialize<identifier, "and" | "or"> }
   ChildOp { ">" ">"? }
 
   BinOp { $[+\-*/=] | $[<>] "="? | "=" $[<>] }
+
+  @precedence { VariableName, BinOp }
 
   Important { "!important" }
 
