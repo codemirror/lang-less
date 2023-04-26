@@ -23,7 +23,7 @@ item {
 mixinArgList { ArgList<value (":" value+ | value*) | AtKeyword? "..."> }
 
 RuleSet {
-  selector ("," selector)* mixinArgList? (@extend[@name=when]<identifier, "when"> query)? Block
+  selector ("," selector)* mixinArgList? (@extend[@name=when]<identifier, "when"> value)? Block
 }
 
 ImportStatement {
@@ -114,7 +114,7 @@ Declaration {
 }
 
 Inclusion {
-  selector mixinArgList Important?
+  selector mixinArgList? Important?
 }
 
 unaryOp { @specialize[@name=UnaryQueryOp]<identifier, "not" | "only"> }
@@ -128,6 +128,7 @@ query {
   SelectorQuery { @specialize[@name=selector]<callee, "selector"> "(" selector ")" } |
   CallQuery { callee ArgList<query> } |
   SubscriptQuery { query !sub "[" value? "]" } |
+  AtKeyword |
   Escape |
   Interpolation
 }
@@ -183,7 +184,7 @@ LogicOp { @specialize<identifier, "and" | "or"> }
 @tokens {
   UniversalSelector { "*" }
 
-  NestingSelector { "&" }
+  NestingSelector { "&" (@asciiLetter | @digit | "-")* }
 
   word { @asciiLetter (@asciiLetter | @digit | "-")* }
 

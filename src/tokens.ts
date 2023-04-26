@@ -21,7 +21,8 @@ export const identifiers = new ExternalTokenizer((input, stack) => {
       input.advance()
     } else {
       if (inside)
-        input.acceptToken(next == Ch.parenL ? callee : dashes == 2 && stack.canShift(VariableName) ? VariableName : identifier)
+        input.acceptToken(next == Ch.parenL && stack.canShift(callee) ? callee
+          : dashes == 2 && stack.canShift(VariableName) ? VariableName : identifier)
       break
     }
   }
