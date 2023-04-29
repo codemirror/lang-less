@@ -132,7 +132,10 @@ a:hover {
 // use detached ruleset
 .top {
     @detached-ruleset(); 
-}`, `@import (less) "foo.css";`, `@plugin "my-plugin";`]
+}`, `@import (less) "foo.css";`, `@plugin "my-plugin";`, `// Detached without semi
+@name: { font-face: sad; }
+div { line-height: 2 }
+`]
   for (let text of cases)
     it(/^.*/.exec(text)![0], () => strict.parse(text))
 })

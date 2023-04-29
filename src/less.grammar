@@ -17,7 +17,8 @@ item {
   CharsetStatement |
   NamespaceStatement |
   KeyframesStatement |
-  SupportsStatement
+  SupportsStatement |
+  DetachedRuleSet
 }
 
 mixinArgList {
@@ -33,7 +34,7 @@ RuleSet {
 }
 
 ImportStatement {
-  @specialize[@name=import]<AtKeyword, "@import" | "@plugin"> ("(" value ")")? StringLiteral commaSep<query> ";"
+  @specialize[@name=import]<AtKeyword, "@import" | "@plugin"> ("(" commaSep<value> ")")? StringLiteral commaSep<query> ";"
 }
 
 MediaStatement {
@@ -64,12 +65,14 @@ SupportsStatement {
   @specialize[@name=supports]<AtKeyword, "@supports"> query Block
 }
 
+DetachedRuleSet { propertyName ":" Block ";"? }
+
 Block { "{" blockContent "}" }
 
 decl { Declaration | Inclusion | CallExpression { AtKeyword mixinArgList } }
 
 blockContent {
-  ~item item* (decl (";" ~item item* decl?)*)?
+  (~item item | decl ";")* decl?
 }
 
 selector {
@@ -109,9 +112,13 @@ ArgList<content> {
 
 PropertyName { identifier ~item }
 
-Declaration {
+propertyName {
   (Interpolation? PropertyName (Interpolation PropertyName?)* | Interpolation ~item | VariableName | AtKeyword | Escape)
-  ("+" | "+_")? ":"
+  ("+" | "+_")?
+}
+
+Declaration {
+  propertyName ":"
   (value (","? value)* Important? | 
    Inclusion { (IdSelector { "#" IdName } | ClassSelector { "." ClassName }) selector? mixinArgList? })
 }
@@ -147,7 +154,6 @@ value {
   StringLiteral |
   Escape |
   Interpolation |
-  Block |
   BinaryExpression { value !valueOp (BinOp | LogicOp) value } |
   UnaryExpression { unaryOp value } |
   CallExpression |
