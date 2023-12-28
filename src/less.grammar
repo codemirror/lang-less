@@ -213,13 +213,13 @@ LogicOp { @specialize<identifier, "and" | "or"> }
 
   whitespace { @whitespace+ }
 
-  Comment { "/*" commentRest }
+  Comment[isolate] { "/*" commentRest }
 
   commentRest { ![*] commentRest | "*" commentAfterStar }
 
   commentAfterStar { "/" | "*" commentAfterStar | ![/*] commentRest }
 
-  LineComment { "//" ![\n]* }
+  LineComment[isolate] { "//" ![\n]* }
 
   @precedence { Comment, LineComment, BinOp }
 
@@ -237,7 +237,7 @@ LogicOp { @specialize<identifier, "and" | "or"> }
 
   @precedence { numberLiteralInner, ".", BinOp }
 
-  StringLiteral { "\"" (!["\n\\] | "\\" _)* "\"" | "'" (!['\n\\] | "\\" _)* "'" }
+  StringLiteral[isolate] { "\"" (!["\n\\] | "\\" _)* "\"" | "'" (!['\n\\] | "\\" _)* "'" }
 
   Escape { "~" StringLiteral }
 
