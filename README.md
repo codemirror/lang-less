@@ -2,7 +2,7 @@
 
 # @codemirror/lang-less [![NPM version](https://img.shields.io/npm/v/@codemirror/lang-less.svg)](https://www.npmjs.org/package/@codemirror/lang-less)
 
-[ [**WEBSITE**](https://codemirror.net/) | [**ISSUES**](https://github.com/codemirror/dev/issues) | [**FORUM**](https://discuss.codemirror.net/c/next/) | [**CHANGELOG**](https://github.com/codemirror/lang-less/blob/main/CHANGELOG.md) ]
+[ [**WEBSITE**](https://codemirror.net/) | [**ISSUES**](https://github.com/codemirror/dev/issues) | [**FORUM**](https://discuss.codemirror.net//) | [**CHANGELOG**](https://github.com/codemirror/lang-less/blob/main/CHANGELOG.md) ]
 
 This package implements Less language support for the
 [CodeMirror](https://codemirror.net/) code editor.
